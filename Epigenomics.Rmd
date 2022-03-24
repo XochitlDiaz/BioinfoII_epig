@@ -2,7 +2,11 @@
 title: "Epigenomics"
 author: "S. Quiñones, J. Rojas, X. Díaz"
 date: "3/24/2022"
-output: html_document
+output: 
+  html_document:
+    toc: yes
+  pdf_document:
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
