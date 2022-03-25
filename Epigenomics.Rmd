@@ -49,3 +49,6 @@ knitr::opts_chunk$set(echo = TRUE)
     https://hgdownload.cse.ucsc.edu/goldenpath/hg19/liftOver/
     liftOver: A set of of "cadenas" must be downloaded from the UCSC database. 
     
+Monocyte data used
+http://ftp.ebi.ac.uk/pub/databases/blueprint/data/homo_sapiens/GRCh38/venous_blood/Primary_monocytes_Donor_E/monocyte_-_None/ChIP-Seq/NCMLS/S01E11H1.ERX1484944.H3K4me3.bwa.GRCh38.20160701.bed.gz
+http://ftp.ebi.ac.uk/pub/databases/blueprint/data/homo_sapiens/GRCh38/venous_blood/Primary_monocytes_Donor_C/monocyte_-_None/ChIP-Seq/NCMLS/S01BM8H1.ERX1484934.H3K4me3.bwa.GRCh38.20160527.bed.gz
