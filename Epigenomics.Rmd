@@ -15,9 +15,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 # Introduction
+  Our assay is to compare enrichment of H3K4me3 in promoter regions with HiC fragments, which most likely will represent enhancers, from B cells.
+  
 
 
 # Analysis
+##Data Description
+-Species: Homo Sapiens
+-Cell type: B cell
+-Subject: 27 year old female
+
 
 ## Defining a histone of interest
 
