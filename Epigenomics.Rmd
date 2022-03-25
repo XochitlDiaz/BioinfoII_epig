@@ -21,6 +21,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Defining a histone of interest
 
+  To perform our analyisis, it is important to select carefully a target histone. In this case, we have chosen H3K4me3. The biological reason for doing so is that H3K4me3 has been reported associated to increased promoter activity and transcription. Therefore, whilst performing our analysis, we expect this histone to have an increased activity in promoters respective to enhancers.
+
 ## ¿Is there Histone enrichment comparing enhancers and promoters?
 
 ## ¿What transcription factor is enriched in both promoters and enhancers?
