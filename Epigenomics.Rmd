@@ -14,3 +14,21 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
+# Introduction
+
+
+# Analysis
+
+## Defining a histone of interest
+
+## ¿Is there Histone enrichment comparing enhancers and promoters?
+
+## ¿What transcription factor is enriched in both promoters and enhancers?
+
+## Using non redundant colection
+
+## Using permutations as control sequences
+
+## Conclusion
+
+# Sources
