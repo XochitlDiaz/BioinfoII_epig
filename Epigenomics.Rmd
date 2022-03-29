@@ -33,6 +33,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ## ¿Is there Histone enrichment comparing enhancers and fragments?
 ### Statistical proof
 
+## FastQ Pipeline into BigWig
+  To create the bigwig files used in this analysis, the fastq files obtained through sequencing were concatenated if more than one was prodeced per biological replicate. These were all submitted to quality controls; specifically, read length should have a minimum length of 50bp. Then, either the unique or concatenated files were aligned into bam files. A quality control was then performed on the resulting bam files and then filtered to make a second bam file according to quality. 
+
 ## ¿What transcription factor is enriched in both promoters and enhancers?
 
 ## Using non redundant Jaspar colection
@@ -42,3 +45,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Conclusion
 
 # Sources
+
+    https://hgdownload.cse.ucsc.edu/goldenpath/hg19/liftOver/
+    liftOver: A set of of "cadenas" must be downloaded from the UCSC database. 
+    
+Monocyte data used
+http://ftp.ebi.ac.uk/pub/databases/blueprint/data/homo_sapiens/GRCh38/venous_blood/Primary_monocytes_Donor_E/monocyte_-_None/ChIP-Seq/NCMLS/S01E11H1.ERX1484944.H3K4me3.bwa.GRCh38.20160701.bed.gz
+http://ftp.ebi.ac.uk/pub/databases/blueprint/data/homo_sapiens/GRCh38/venous_blood/Primary_monocytes_Donor_C/monocyte_-_None/ChIP-Seq/NCMLS/S01BM8H1.ERX1484934.H3K4me3.bwa.GRCh38.20160527.bed.gz
