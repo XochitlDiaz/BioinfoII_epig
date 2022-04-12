@@ -116,7 +116,7 @@ we used the following page: <https://genome.ucsc.edu/cgi-bin/hgLiftOver>
 
 In this page, we need to upload our bed files and indicate the original
 version of our data and the version to which we want to transform them.
-What the web page is actually doing is to run the following command:
+What the web page is actually doing is running the following command:
 
 ```{r eval=FALSE, echo=TRUE}
 
@@ -152,20 +152,14 @@ wget http://ftp.ebi.ac.uk/pub/databases/blueprint/data/homo_sapiens/GRCh38/venou
 We decided to obtain 3 replicates as in the paper. The samples have the
 following features:
 
-\*S0022I
+\*S0022I : Sample from a 50 - 55 years old female. Cell-type
+inflammatory macrophage and tissue-type venous blood.
 
-Sample from a 50 - 55 years old female. Cell-type inflammatory
+\*S001S7 : Sample from a 40 - 45 years old female. Cell-type
+inflammatory macrophage and tissue-type venous blood.
+
+\*S001MJ : Sample from a 55 - 60 years old male Cell-type inflammatory
 macrophage and tissue-type venous blood.
-
-\*S001S7
-
-Sample from a 40 - 45 years old female. Cell-type inflammatory
-macrophage and tissue-type venous blood.
-
-\*S001MJ
-
-Sample from a 55 - 60 years old male Cell-type inflammatory macrophage
-and tissue-type venous blood.
 
 Both cell type and tissue type are the same as in the paper, also the
 cell isolation methods used by the paper are the same used in blueprint.
@@ -411,7 +405,7 @@ The first three files are our normalized BigWigs. The last filename is the one t
 
 Now we need to convert the merged bedGraph file to a BigWig. To do so,
 we first sorted the bedGraph file given the recommendations read in
-biostarts.
+biostars.
 
 ```{r eval=FALSE, echo=TRUE}
 
@@ -565,7 +559,7 @@ and Enhancers data. The test returned a 99% confidence interval that
 goes from 1.773477 to 1.815496, so, given that the sign of the interval
 is positive, this proves that mean of the Promoters data is greater than
 the mean of the Enhancers data, proving that there is a significant
-enrichment for the histone H3K4m3 in promoter regions as expected.
+enrichment for the histone modification H3K4m3 in promoter regions as expected.
 
 ```{r}
 
@@ -575,13 +569,37 @@ enrichment for the histone H3K4m3 in promoter regions as expected.
 
 To create the bigwig files used in this analysis, the fastq files
 obtained through sequencing were concatenated if more than one was
-prodeced per biological replicate. These were all submitted to quality
+produced per biological replicate. These were all submitted to quality
 controls; specifically, read length should have a minimum length of
 50bp. Then, either the unique or concatenated files were aligned into
 bam files. A quality control was then performed on the resulting bam
 files and then filtered to make a second bam file according to quality.
 
 ## ¿What transcription factor is enriched in both promoters and enhancers?
+
+To compare enrichment present in both data sets we need a .bed file that contains the sequences that are enriched for both promoters and enhancers.
+```{r, eval =F}
+module load bedops/2.4.20
+bedops --merge Enhancers_data_paper_38.bed Promoters_data_paper_38.bed > Enh_Pro_38.bed
+
+module load bedtools/2.26
+sortBed -i Enh_Pro_38.bed > Sorted_Enh_Pro_38.bed
+```
+
+In the following link we uploaded the Sorted_Enh_Pro_38.bed file to fetch the sequences found in both promoters and enhancers.
+http://rsat.sb-roscoff.fr/fetch-sequences_form.php
+As settings we used : 
+- Geneome: hg38
+- Header format UCSC
+- Reference from which the sequence should de fetched: Segment
+
+This gave us .bed file with the Genomic coordinates, a .fasta file with the fetched sequences, and a .txt file with the information of the submitted job.
+
+We downloaded the .fasta file to the cluster
+```{r, eval =F}
+wget -O fetched_seq.fasta http://rsat.sb-roscoff.fr//tmp/apache/2022/04/12/Sorted_Enh_Pro_38_jcrt_20220412_210953.fasta
+```
+
 
 ## Using non redundant Jaspar colection
 
@@ -597,3 +615,9 @@ files and then filtered to make a second bam file according to quality.
 Monocyte data used
 <http://ftp.ebi.ac.uk/pub/databases/blueprint/data/homo_sapiens/GRCh38/venous_blood/Primary_monocytes_Donor_E/monocyte_-_None/ChIP-Seq/NCMLS/S01E11H1.ERX1484944.H3K4me3.bwa.GRCh38.20160701.bed.gz>
 <http://ftp.ebi.ac.uk/pub/databases/blueprint/data/homo_sapiens/GRCh38/venous_blood/Primary_monocytes_Donor_C/monocyte_-_None/ChIP-Seq/NCMLS/S01BM8H1.ERX1484934.H3K4me3.bwa.GRCh38.20160527.bed.gz>
+##References
+
+
+
+
+
