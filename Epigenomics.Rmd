@@ -578,7 +578,7 @@ files and then filtered to make a second bam file according to quality.
 ## ¿What transcription factor is enriched in both promoters and enhancers?
 
 To compare enrichment present in both data sets we need a .bed file that contains the sequences that are enriched for both promoters and enhancers.
-```{r, eval =F}
+```{eval =F}
 module load bedops/2.4.20
 bedops --merge Enhancers_data_paper_38.bed Promoters_data_paper_38.bed > Enh_Pro_38.bed
 
@@ -596,14 +596,45 @@ As settings we used :
 This gave us .bed file with the Genomic coordinates, a .fasta file with the fetched sequences, and a .txt file with the information of the submitted job.
 
 We downloaded the .fasta file to the cluster
-```{r, eval =F}
+```{eval =F}
 wget -O fetched_seq.fasta http://rsat.sb-roscoff.fr//tmp/apache/2022/04/12/Sorted_Enh_Pro_38_jcrt_20220412_210953.fasta
 ```
 
+## Non redundant Jaspar colection
+We retrieved a non redundant JASPAR collection of characterized TFBS so that our analysis is not biases by overlapping TFBS. If we used the redundant JASPAR collection, this would make us considered some regions multiple times in our analysis, which is is not ideal for solely identifying the TFBS present in both promoters and enhancers in our data.
 
-## Using non redundant Jaspar colection
+To do this we entered this used the CORE Jaspar collection and filtered it to down to Homo sapiens latest version profiles. 727 profiles where found as shown in the following link:  https://jaspar.genereg.net/search?page=1&page_size=250&type=all&class=all&version=latest&tax_group=vertebrates&tax_id=9606&collection=CORE&family=all&q=Homo%20sapiens
 
-## Using permutations as control sequences
+Next we 'added to cart' all profiles found.
+After setting the download option for all this profiles as 'combined' and matrix format 'MEME' (as this is the format supported by the program 'matrix-scan' that we will be using along with R-sat for pattern matching), the Jaspar web-site gives a link to download the matrices. We download this to the cluster.
+```{eval=F}
+wget -O JASPAR_combined_matrices_meme.txt http://jaspar.genereg.net/temp/20220414023302_JASPAR2022_combined_matrices_4880_meme.txt
+```
+
+## Permutations as control sequences
+For the control, we downloaded permuted versions of the 727 profiles found in Jaspar so that we have better chances of the results from the pattern matching not being by chance. For the permute settings we used type: 'between all matrices', and  format: MEME. We download the permuted matrices to the cluster.
+```{eval=F}
+wget -O JASPAR_permuted_matrices_meme.txt http://jaspar.genereg.net/temp/20220414024918_permuted_matrices_4880.txt
+```
+
+Note: The links provided by JASPAR to download the generated files fast up to 5 days.
+
+##Pattern Matching
+Form the RSAT documentation we decided to use the 'matrix-scan' program for pattern matching as it allows multiple sequences and PSSM as input, as well as pre-calibrated markov models.
+
+```{eval=F}
+module load rsat/8sep2021
+
+matrix-scan -m JASPAR_combined_matrices_meme.txt -i fetched_seq.fasta -bginput -markov 0 -o matrix_scan_combined
+
+
+```
+
+```{eval=F}
+
+```
+
+
 
 ## Conclusion
 
