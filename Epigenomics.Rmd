@@ -619,16 +619,35 @@ wget -O JASPAR_permuted_matrices_meme.txt http://jaspar.genereg.net/temp/2022041
 
 Note: The links provided by JASPAR to download the generated files fast up to 5 days.
 
-##Pattern Matching
+## Pattern Matching
 Form the RSAT documentation we decided to use the 'matrix-scan' program for pattern matching as it allows multiple sequences and PSSM as input, as well as pre-calibrated markov models.
 
+
+### JASPAR matrices
+The PSSM matrices used for this command were retrieved from JASPAR by selecting all motifs registered under the homo_sapiens section and then merging them into a single file.
+To generate a control signal, the same matrices were selected and then permuted by the JASPAR site. The resulting files were both downloaded with the command wget.
+
+### Retrieve Sequences 
+Another requirement for this command was retrieving the sequences marked by the bed files of both promoters and enhancers. This was achieved by using the rsat command:
+
+    fetch-sequences -i ../Enhancers_data_paper.bed -o Enhancers.fasta -genome hg38
+    fetch-sequences -i ../Promoters_data_paper.bed -o Promoters.fasta -genome hg38
+
+### Matrix Scan 
+Using both sequences and the JASPAR matrices, we performed a matrix scan:
 ```{eval=F}
 module load rsat/8sep2021
 
 matrix-scan -m JASPAR_combined_matrices_meme.txt -i fetched_seq.fasta -bginput -markov 0 -o matrix_scan_combined
 
+## Alternative
+
+matrix-scan -m combined_matrices.tab -i Promoters.fasta -bg_format meme -bgfile permuted_meme.txt -o Promoters.tab
+matrix-scan -m combined_matrices.tab -i Enhancers.fasta -bg_format meme -bgfile permuted_meme.txt -o Enhancers.tab
 
 ```
+
+
 
 ```{eval=F}
 
@@ -641,7 +660,9 @@ matrix-scan -m JASPAR_combined_matrices_meme.txt -i fetched_seq.fasta -bginput -
 # Sources
 
     https://hgdownload.cse.ucsc.edu/goldenpath/hg19/liftOver/
-    liftOver: A set of of "cadenas" must be downloaded from the UCSC database. 
+    liftOver: A set of of "cadenas" must be downloaded from the UCSC database.     https://jaspar.genereg.net/analysis
+    
+    
 
 Monocyte data used
 <http://ftp.ebi.ac.uk/pub/databases/blueprint/data/homo_sapiens/GRCh38/venous_blood/Primary_monocytes_Donor_E/monocyte_-_None/ChIP-Seq/NCMLS/S01E11H1.ERX1484944.H3K4me3.bwa.GRCh38.20160701.bed.gz>
