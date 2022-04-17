@@ -617,10 +617,10 @@ For the control, we downloaded permuted versions of the 727 profiles found in Ja
 wget -O JASPAR_permuted_matrices_meme.txt http://jaspar.genereg.net/temp/20220414024918_permuted_matrices_4880.txt
 ```
 
-Note: The links provided by JASPAR to download the generated files fast up to 5 days.
+Note: The links provided by JASPAR to download the generated files last up to 5 days.
 
 ## Pattern Matching
-Form the RSAT documentation we decided to use the 'matrix-scan' program for pattern matching as it allows multiple sequences and PSSM as input, as well as pre-calibrated markov models.
+From the RSAT documentation we decided to use the 'matrix-scan' program for pattern matching as it allows multiple sequences and PSSM as input, as well as pre-calibrated markov models.
 
 
 ### JASPAR matrices
@@ -647,12 +647,23 @@ matrix-scan -m combined_matrices.tab -i Enhancers.fasta -bg_format meme -bgfile 
 
 ```
 
-
+Once the output from the matrix-scan command was ready, the next step was to obtain significantly expressed TF's. This was achieved by loading the documents into an R workspace.
 
 ```{eval=F}
 
 ```
 
+### Question Section
+
+
+<h4> Why is it convenient to use the non-redundant collection from Jaspar? </h4>
+
+By using the non-redundant collection we can avoid over representing certain TF's that are either documented under a diferent name or placed in overlapping sequences. This overrepresentation could lead to incorrectly calling these TF's as overexpressed.
+
+
+<h4> Why is using permuted sequences useful as a control? </h4>
+
+Because we can quickly evaluate whether the results we obtained are a product of randomness or a biological consequence. This is especially important when analyzing very big datasets, since the probability of finding significant false-positives will rise rapidly.
 
 
 ## Conclusion
