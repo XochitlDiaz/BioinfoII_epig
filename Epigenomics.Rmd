@@ -580,10 +580,10 @@ files and then filtered to make a second bam file according to quality.
 To compare enrichment present in both data sets we need a .bed file that contains the sequences that are enriched for both promoters and enhancers.
 ```{eval =F}
 module load bedops/2.4.20
-bedops --merge Enhancers_data_paper_38.bed Promoters_data_paper_38.bed > Enh_Pro_38.bed
+bedops --intersect Enhancers_data_paper_38.bed Promoters_data_paper_38.bed > Enh_Pro_isec38.bed
 
 module load bedtools/2.26
-sortBed -i Enh_Pro_38.bed > Sorted_Enh_Pro_38.bed
+sortBed -i Enh_Pro_isec38.bed > Sorted_Enh_Pro_isec38.bed
 ```
 
 In the following link we uploaded the Sorted_Enh_Pro_38.bed file to fetch the sequences found in both promoters and enhancers.
@@ -609,12 +609,20 @@ Next we 'added to cart' all profiles found.
 After setting the download option for all this profiles as 'combined' and matrix format 'MEME' (as this is the format supported by the program 'matrix-scan' that we will be using along with R-sat for pattern matching), the Jaspar web-site gives a link to download the matrices. We download this to the cluster.
 ```{eval=F}
 wget -O JASPAR_combined_matrices_meme.txt http://jaspar.genereg.net/temp/20220414023302_JASPAR2022_combined_matrices_4880_meme.txt
+
+wget -O JASPAR_matrices_meme.txt http://jaspar.genereg.net/temp/20220419044948_JASPAR2022_combined_matrices_29625_meme.txt
+
+
+
 ```
 
 ## Permutations as control sequences
 For the control, we downloaded permuted versions of the 727 profiles found in Jaspar so that we have better chances of the results from the pattern matching not being by chance. For the permute settings we used type: 'between all matrices', and  format: MEME. We download the permuted matrices to the cluster.
 ```{eval=F}
 wget -O JASPAR_permuted_matrices_meme.txt http://jaspar.genereg.net/temp/20220414024918_permuted_matrices_4880.txt
+
+
+wget -O JASPAR_permatrices_meme.txt http://jaspar.genereg.net/temp/20220419045401_permuted_matrices_29625.txt
 ```
 
 Note: The links provided by JASPAR to download the generated files fast up to 5 days.
@@ -625,8 +633,14 @@ Form the RSAT documentation we decided to use the 'matrix-scan' program for patt
 ```{eval=F}
 module load rsat/8sep2021
 
-matrix-scan -m JASPAR_combined_matrices_meme.txt -i fetched_seq.fasta -bginput -markov 0 -o matrix_scan_combined
+matrix-scan -m JASPAR_combined_matrices_meme.txt -matrix_format meme -i fetched_seq.fasta -bgfile JASPAR_permuted_matrices_meme.txt -bg_format meme -o matrix_scan_combined
 
+matrix-scan -m JASPAR_combined_matrices_meme.txt -matrix_format meme -i fetched_seq.fasta -bginput -markov 0 -o matrix_scan_combined
+
+matrix-scan -m JASPAR_permuted_matrices_meme.txt -matrix_format meme -i fetched_seq.fasta -bginput -markov 0 -o matrix_scan_permuted
+
+###
+matrix-scan -m JASPAR_matrices_meme.txt -matrix_format meme -i fetched_seq2.fasta -bgfile JASPAR_permatrices_meme.txt -bg_format meme -o matrix_scan2
 
 ```
 
@@ -646,9 +660,24 @@ matrix-scan -m JASPAR_combined_matrices_meme.txt -i fetched_seq.fasta -bginput -
 Monocyte data used
 <http://ftp.ebi.ac.uk/pub/databases/blueprint/data/homo_sapiens/GRCh38/venous_blood/Primary_monocytes_Donor_E/monocyte_-_None/ChIP-Seq/NCMLS/S01E11H1.ERX1484944.H3K4me3.bwa.GRCh38.20160701.bed.gz>
 <http://ftp.ebi.ac.uk/pub/databases/blueprint/data/homo_sapiens/GRCh38/venous_blood/Primary_monocytes_Donor_C/monocyte_-_None/ChIP-Seq/NCMLS/S01BM8H1.ERX1484934.H3K4me3.bwa.GRCh38.20160527.bed.gz>
-##References
+
+##References and Programs used
+
+Author. (year) Title. Journal editon. pp-pp.
 
 
+Biola M. Javierre, Oliver S. Burren, Steven P. Wilder, ..., Chris Wallace, Mikhail Spivakov, Peter Fraser (2016). Lineage-Specific Genome Architecture Links Enhancers and Non-coding Disease Variants to Target Gene Promoters. Cell 167, 1369-1384.
 
+Thomas-Chollier, M., Sand, O., Turatsinze, J. V., Janky, R., Defrance, M., Vervisch, E., Brohée, S., & van Helden, J. (2008). RSAT: regulatory sequence analysis tools. Nucleic acids research, 36(Web Server issue), W119–W127. https://doi.org/10.1093/nar/gkn304
+
+Wasserman, W., Sandelin, A. Applied bioinformatics for the identification of regulatory elements. Nat Rev Genet 5, 276–287 (2004). https://doi.org/10.1038/nrg1315
+
+matrix-scan: http://rsat.sb-roscoff.fr/help.matrix-scan.html
+
+bedops 2.4.20 : https://bedops.readthedocs.io/en/latest/content/reference/set-operations/bedops.html
+
+JASPAR 2022: https://jaspar.genereg.net/
+
+RSAT Metazoa: http://rsat.sb-roscoff.fr/tutorials.php
 
 
