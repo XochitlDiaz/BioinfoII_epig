@@ -562,9 +562,6 @@ is positive, this proves that mean of the Promoters data is greater than
 the mean of the Enhancers data, proving that there is a significant
 enrichment for the histone modification H3K4m3 in promoter regions as expected.
 
-```{r}
-
-```
 
 ## FastQ Pipeline into BigWig
 
@@ -579,10 +576,13 @@ files and then filtered to make a second bam file according to quality.
 ## ¿What transcription factor is enriched in both promoters and enhancers?
 
 To compare enrichment present in both data sets we need a .bed file that contains the sequences that are enriched for both promoters and enhancers.
+We got this file by using the bedops program, it is a tool used to find relationships between two or more genomic datasets. In this case we used the --intersect function, which allows us to out put a .bed file that contains the regions that are common in both input files, in other words it gives the intersection of genomic space of two .bed files. This input .bed files must be sorted, which we all ready did in previous steps.
 ```{eval =F}
 module load bedops/2.4.20
 bedops --intersect Enhancers_data_paper_38.bed Promoters_data_paper_38.bed > Enh_Pro_isec38.bed
-
+```
+Because both input files are sorted, the output file will be sorted too, but in case it wasn't sorted we could run the following (this function was previously explained):
+```{eval =F}
 module load bedtools/2.26
 sortBed -i Enh_Pro_isec38.bed > Sorted_Enh_Pro_isec38.bed
 ```
@@ -594,62 +594,123 @@ As settings we used :
 - Header format UCSC
 - Reference from which the sequence should de fetched: Segment
 
-This gave us .bed file with the Genomic coordinates, a .fasta file with the fetched sequences, and a .txt file with the information of the submitted job.
+This gave us a .bed file with the Genomic coordinates, a .fasta file with the fetched sequences, and a .txt file with the information of the submitted job.
 
 We downloaded the .fasta file to the cluster
 ```{eval =F}
-wget -O fetched_seq.fasta http://rsat.sb-roscoff.fr//tmp/apache/2022/04/12/Sorted_Enh_Pro_38_jcrt_20220412_210953.fasta
+wget -O fetched_seq2.fasta http://rsat.sb-roscoff.fr//tmp/apache/2022/04/12/Sorted_Enh_Pro_38_jcrt_20220412_210953.fasta
 ```
 
 ## Non redundant Jaspar colection
 We retrieved a non redundant JASPAR collection of characterized TFBS so that our analysis is not biases by overlapping TFBS. If we used the redundant JASPAR collection, this would make us considered some regions multiple times in our analysis, which is is not ideal for solely identifying the TFBS present in both promoters and enhancers in our data.
 
-To do this we entered this used the CORE Jaspar collection and filtered it to down to Homo sapiens latest version profiles. 727 profiles where found as shown in the following link:  https://jaspar.genereg.net/search?page=1&page_size=250&type=all&class=all&version=latest&tax_group=vertebrates&tax_id=9606&collection=CORE&family=all&q=Homo%20sapiens
+To do this we used the CORE Jaspar collection and filtered it to down to Homo sapiens latest version profiles that where optained with Chip-seq. 233 profiles where found as shown in the following link:  https://jaspar.genereg.net/search?q=&collection=CORE&tax_group=all&tax_id=9606&type=ChIP-seq&class=all&family=all&version=latest
 
 Next we 'added to cart' all profiles found.
 After setting the download option for all this profiles as 'combined' and matrix format 'MEME' (as this is the format supported by the program 'matrix-scan' that we will be using along with R-sat for pattern matching), the Jaspar web-site gives a link to download the matrices. We download this to the cluster.
 ```{eval=F}
-wget -O JASPAR_combined_matrices_meme.txt http://jaspar.genereg.net/temp/20220414023302_JASPAR2022_combined_matrices_4880_meme.txt
-
 wget -O JASPAR_matrices_meme.txt http://jaspar.genereg.net/temp/20220419044948_JASPAR2022_combined_matrices_29625_meme.txt
-
-
-
 ```
 
 ## Permutations as control sequences
-For the control, we downloaded permuted versions of the 727 profiles found in Jaspar so that we have better chances of the results from the pattern matching not being by chance. For the permute settings we used type: 'between all matrices', and  format: MEME. We download the permuted matrices to the cluster.
+For the control, we downloaded permuted versions of the 233 profiles found in Jaspar so that we have better chances of the results from the pattern matching not being by chance. For the permute settings we used type: 'within each matrix' (so that we are not biased towards the nucleotide abundance of certain TFBS regions), and  format: MEME. We download the permuted matrices to the cluster.
 ```{eval=F}
-wget -O JASPAR_permuted_matrices_meme.txt http://jaspar.genereg.net/temp/20220414024918_permuted_matrices_4880.txt
-
-
 wget -O JASPAR_permatrices_meme.txt http://jaspar.genereg.net/temp/20220419045401_permuted_matrices_29625.txt
 ```
 
-Note: The links provided by JASPAR to download the generated files fast up to 5 days.
+Note: The links provided by JASPAR to download the generated files last up to 5 days.
 
 ##Pattern Matching
-Form the RSAT documentation we decided to use the 'matrix-scan' program for pattern matching as it allows multiple sequences and PSSM as input, as well as pre-calibrated markov models.
+Form the RSAT documentation we decided to use the 'matrix-scan' program for pattern matching as it allows multiple sequences and PSSM as input, as well as pre-calibrated markov models and customized background models. In this case we used the permuted matrices as background model as this plays with the nucleotide frequency in a certain region and will be a good indicator for the matrix-scan to statistically test how likely it is for a region with this nucleotide frequencies to match the TFBS by chance or because it could be a real TFBS.
 
 ```{eval=F}
 module load rsat/8sep2021
 
-matrix-scan -m JASPAR_combined_matrices_meme.txt -matrix_format meme -i fetched_seq.fasta -bgfile JASPAR_permuted_matrices_meme.txt -bg_format meme -o matrix_scan_combined
-
-matrix-scan -m JASPAR_combined_matrices_meme.txt -matrix_format meme -i fetched_seq.fasta -bginput -markov 0 -o matrix_scan_combined
-
-matrix-scan -m JASPAR_permuted_matrices_meme.txt -matrix_format meme -i fetched_seq.fasta -bginput -markov 0 -o matrix_scan_permuted
-
-###
 matrix-scan -m JASPAR_matrices_meme.txt -matrix_format meme -i fetched_seq2.fasta -bgfile JASPAR_permatrices_meme.txt -bg_format meme -o matrix_scan2
-
 ```
+-m <matrces_file_meme.txt>  indicates the name of the matices file
+-matrix_format meme         indicates the matrices file is in meme format
+-i <sequences.fasta>        indicates the name of the file with the sequences it will use to scan the matrices with
+-bgfile <backgroung_model.txt> indicates the name of the file with the background model
+-bg_format meme             indicates the backgound model file is in meme format
+-o <outout_file>            indicates the name of the output file it will write
 
+Note: This function might take several days to run
+
+The output file is tab-delimited with one row per match, it contains the following information:
+
+-seq_id: Name of the sequence, in this case it has a hg38_chr<n>_<start_pos>_<end_pos>_+ format
+-ft_type: it takes values of 'limit' or 'site', with site indicating the match is at the TFBS.
+-ft_name: Name of the PWM corresponding to this hit
+-strand: Indicates in which strand was the hit, 'D' is for direct strand and 'R' is for reverse strand.
+-start: Position of the first hit relative to the fetched seq, with the first nucleotide being -1.
+-end: Position of the last hit relative to the fetched seq, with the first nucleotide being -1.
+-sequence: Nucleotide sequence of the potential binding site.
+-weight: Weight of a sequence segment (Ws) calculated as: 
+$$
+Ws= log[P(S|M)/P(S|B)]
+$$
+Where:
+S : Sequence segment
+M : PSSM 
+B : Background model matrix
+Note: the program uses natural logarithms
+
+##Finding significant TFBS
+To retrieve the most significant TFBS matched by our fetched sequences (that represent the genomic regions where H3K4me3 binds in both promoters and enhancers); we first look at the weight scores given by the matrix-scan program and the length of the matched sequences. 
+Here we are looking for the biggest weight scores. Because of how the weight is calculated, then the bigger the weight scores, the more significant the probability of the matched sequences is to be a real TFBS. We also look for fairly long sequences, as short matching sequences will easily fit into random sequences just because they are short. 
+
+To fetch long sequences (30 nucleotides or more) and high weight scores (grater then 80):
+Note: the length and weight scores are arbitrary.
 ```{eval=F}
+awk '{if(($6 - $5)> 29 && $8>80) print ($8)}' matrix_scan2 > filtered_mat_scan2
 
+#to see how many significant TFBS where found:
+wc -l filtered_mat_scan2
+#output
+773772
 ```
+With this parameters 773772 matches where found for our fetched sequences.
+
+To fetch the name of the promoter for each matrix match that passed our threshold:
+```{r, eval=F}
+awk '{
+  for (i=1;1<=NF;i++) /filtered_mat_scan2[i]/
+}
+END{
+  
+}'
+grep 'matrix_id' JASPAR_matrices_meme.txt
 
 
+
+module load python38/3.8.3
+
+#python 3.8
+#library to use grep with python
+import re
+
+#opening data in env
+with open(filtered_mat_scan2, "r") as file1:
+  mat= file1.readlines()
+
+file2= open("JASPAR_matrices_meme.txt")
+JPR= file2.readlines()
+file2.close()
+#opening output file
+outF = open("TFBS.txt", "w")
+
+
+#search pattern
+for matid in mat:
+  x= re.search('"%s".[\w-]' % (matid), JPR)
+  s= x.split('.')
+  x2= s[1]
+  print >>outF, x2
+  
+#close output file
+outF.close()
+```
 
 ## Conclusion
 
@@ -681,7 +742,7 @@ JASPAR 2022: https://jaspar.genereg.net/
 
 RSAT Metazoa: http://rsat.sb-roscoff.fr/tutorials.php
 
-
+Rsat matrix-scan output file format documentation:  http://www.ra.cs.uni-tuebingen.de/software/ModuleMaster/doc/html/node6.html
 =======
 ---
 title: "Epigenomics"
