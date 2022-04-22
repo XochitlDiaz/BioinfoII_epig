@@ -663,7 +663,7 @@ Here we are looking for the biggest weight scores. Because of how the weight is 
 To fetch long sequences (30 nucleotides or more) and high weight scores (grater then 80):
 Note: the length and weight scores are arbitrary.
 ```{eval=F}
-awk '{if(($6 - $5)> 29 && $8>80) print ($8)}' matrix_scan2 > filtered_mat_scan2
+awk '{if(($6 - $5)> 29 && $8>80) print ($3)}' matrix_scan2 > filtered_mat_scan2
 
 #to see how many significant TFBS where found:
 wc -l filtered_mat_scan2
@@ -674,6 +674,20 @@ With this parameters 773772 matches where found for our fetched sequences.
 
 To fetch the name of the promoter for each matrix match that passed our threshold:
 ```{r, eval=F}
+# Other way
+# Setting FWER
+a = 0.05
+n = 146,697,729
+# New significance threshold
+p = a/n
+p
+
+# Commands
+awk '{if(($6 - $5)> 19 && $8>22) print ($3)}' matrix_scan2 | sort | uniq > ID_2.txt
+grep "$(<ID_2.txt)" JASPAR_combined_matrices_meme.txt
+
+
+
 awk '{
   for (i=1;1<=NF;i++) /filtered_mat_scan2[i]/
 }
