@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ---
 title: "Epigenomics"
 author: "S. Quiñones, J. Rojas, X. Díaz"
@@ -42,10 +41,9 @@ sets (promoters and fragments).
 
 # Analysis
 
-## Data Description 
--Species: Homo Sapiens 
--Cell type: macrophages
--Subject: adult female
+## Data Description
+
+-Species: Homo Sapiens -Cell type: macrophages -Subject: adult female
 
 ## Defining a histone of interest
 
@@ -472,10 +470,11 @@ This tool creates a heatmap for scores associated with genomic regions
 
 We obtained the following two heatmaps:
 
-![](./fused.png) As we can see, there is an enrichment for the histone
-H3K4me3 in promoters since all the promoters regions analysed here are
-above 2, in contrast, the enhancers regions analysed exhibit scores
-below 1.5.
+![](./fused.png)
+
+As we can see, there is an enrichment for the histone H3K4me3 in
+promoters since all the promoters regions analysed here are above 2, in
+contrast, the enhancers regions analysed exhibit scores below 1.5.
 
 ### Statiscal analysis
 
@@ -562,8 +561,8 @@ and Enhancers data. The test returned a 99% confidence interval that
 goes from 1.773477 to 1.815496, so, given that the sign of the interval
 is positive, this proves that mean of the Promoters data is greater than
 the mean of the Enhancers data, proving that there is a significant
-enrichment for the histone modification H3K4m3 in promoter regions as expected.
-
+enrichment for the histone modification H3K4m3 in promoter regions as
+expected.
 
 ## FastQ Pipeline into BigWig
 
@@ -577,94 +576,148 @@ files and then filtered to make a second bam file according to quality.
 
 ## ¿What transcription factor is enriched in both promoters and enhancers?
 
-To compare enrichment present in both data sets we need a .bed file that contains the sequences that are enriched for both promoters and enhancers.
-We got this file by using the bedops program, it is a tool used to find relationships between two or more genomic datasets. In this case we used the --intersect function, which allows us to out put a .bed file that contains the regions that are common in both input files, in other words it gives the intersection of genomic space of two .bed files. This input .bed files must be sorted, which we all ready did in previous steps.
+To compare enrichment present in both data sets we need a .bed file that
+contains the sequences that are enriched for both promoters and
+enhancers. We got this file by using the bedops program, it is a tool
+used to find relationships between two or more genomic datasets. In this
+case we used the --intersect function, which allows us to out put a .bed
+file that contains the regions that are common in both input files, in
+other words it gives the intersection of genomic space of two .bed
+files. This input .bed files must be sorted, which we all ready did in
+previous steps.
+
 ```{eval =F}
 module load bedops/2.4.20
 bedops --intersect Enhancers_data_paper_38.bed Promoters_data_paper_38.bed > Enh_Pro_isec38.bed
 ```
-Because both input files are sorted, the output file will be sorted too, but in case it wasn't sorted we could run the following (this function was previously explained):
+
+Because both input files are sorted, the output file will be sorted too,
+but in case it wasn't sorted we could run the following (this function
+was previously explained):
+
 ```{eval =F}
 module load bedtools/2.26
 sortBed -i Enh_Pro_isec38.bed > Sorted_Enh_Pro_isec38.bed
 ```
 
-In the following link we uploaded the Sorted_Enh_Pro_38.bed file to fetch the sequences found in both promoters and enhancers.
-http://rsat.sb-roscoff.fr/fetch-sequences_form.php
-As settings we used : 
-- Geneome: hg38
-- Header format UCSC
-- Reference from which the sequence should de fetched: Segment
+In the following link we uploaded the Sorted_Enh_Pro_38.bed file to
+fetch the sequences found in both promoters and enhancers.
+<http://rsat.sb-roscoff.fr/fetch-sequences_form.php> As settings we used
+: - Geneome: hg38 - Header format UCSC - Reference from which the
+sequence should de fetched: Segment
 
-This gave us a .bed file with the Genomic coordinates, a .fasta file with the fetched sequences, and a .txt file with the information of the submitted job.
+This gave us a .bed file with the Genomic coordinates, a .fasta file
+with the fetched sequences, and a .txt file with the information of the
+submitted job.
 
 We downloaded the .fasta file to the cluster
+
 ```{eval =F}
 wget -O fetched_seq2.fasta http://rsat.sb-roscoff.fr//tmp/apache/2022/04/12/Sorted_Enh_Pro_38_jcrt_20220412_210953.fasta
 ```
 
 ## Non redundant Jaspar colection
-We retrieved a non redundant JASPAR collection of characterized TFBS so that our analysis is not biases by overlapping TFBS. If we used the redundant JASPAR collection, this would make us considered some regions multiple times in our analysis, which is is not ideal for solely identifying the TFBS present in both promoters and enhancers in our data.
 
-To do this we used the CORE Jaspar collection and filtered it to down to Homo sapiens latest version profiles that where optained with Chip-seq. 233 profiles where found as shown in the following link:  https://jaspar.genereg.net/search?q=&collection=CORE&tax_group=all&tax_id=9606&type=ChIP-seq&class=all&family=all&version=latest
+We retrieved a non redundant JASPAR collection of characterized TFBS so
+that our analysis is not biases by overlapping TFBS. If we used the
+redundant JASPAR collection, this would make us considered some regions
+multiple times in our analysis, which is is not ideal for solely
+identifying the TFBS present in both promoters and enhancers in our
+data.
 
-Next we 'added to cart' all profiles found.
-After setting the download option for all this profiles as 'combined' and matrix format 'MEME' (as this is the format supported by the program 'matrix-scan' that we will be using along with R-sat for pattern matching), the Jaspar web-site gives a link to download the matrices. We download this to the cluster.
-```{eval=F}
+To do this we used the CORE Jaspar collection and filtered it to down to
+Homo sapiens latest version profiles that where optained with Chip-seq.
+233 profiles where found as shown in the following link:
+<https://jaspar.genereg.net/search?q=&collection=CORE&tax_group=all&tax_id=9606&type=ChIP-seq&class=all&family=all&version=latest>
+
+Next we 'added to cart' all profiles found. After setting the download
+option for all this profiles as 'combined' and matrix format 'MEME' (as
+this is the format supported by the program 'matrix-scan' that we will
+be using along with R-sat for pattern matching), the Jaspar web-site
+gives a link to download the matrices. We download this to the cluster.
+
+``` {eval="F"}
 wget -O JASPAR_matrices_meme.txt http://jaspar.genereg.net/temp/20220419044948_JASPAR2022_combined_matrices_29625_meme.txt
 ```
 
 ## Permutations as control sequences
-For the control, we downloaded permuted versions of the 233 profiles found in Jaspar so that we have better chances of the results from the pattern matching not being by chance. For the permute settings we used type: 'within each matrix' (so that we are not biased towards the nucleotide abundance of certain TFBS regions), and  format: MEME. We download the permuted matrices to the cluster.
-```{eval=F}
+
+For the control, we downloaded permuted versions of the 233 profiles
+found in Jaspar so that we have better chances of the results from the
+pattern matching not being by chance. For the permute settings we used
+type: 'within each matrix' (so that we are not biased towards the
+nucleotide abundance of certain TFBS regions), and format: MEME. We
+download the permuted matrices to the cluster.
+
+``` {eval="F"}
 wget -O JASPAR_permatrices_meme.txt http://jaspar.genereg.net/temp/20220419045401_permuted_matrices_29625.txt
 ```
 
-Note: The links provided by JASPAR to download the generated files last up to 5 days.
+Note: The links provided by JASPAR to download the generated files last
+up to 5 days.
 
-##Pattern Matching
-Form the RSAT documentation we decided to use the 'matrix-scan' program for pattern matching as it allows multiple sequences and PSSM as input, as well as pre-calibrated markov models and customized background models. In this case we used the permuted matrices as background model as this plays with the nucleotide frequency in a certain region and will be a good indicator for the matrix-scan to statistically test how likely it is for a region with this nucleotide frequencies to match the TFBS by chance or because it could be a real TFBS.
+##Pattern Matching Form the RSAT documentation we decided to use the
+'matrix-scan' program for pattern matching as it allows multiple
+sequences and PSSM as input, as well as pre-calibrated markov models and
+customized background models. In this case we used the permuted matrices
+as background model as this plays with the nucleotide frequency in a
+certain region and will be a good indicator for the matrix-scan to
+statistically test how likely it is for a region with this nucleotide
+frequencies to match the TFBS by chance or because it could be a real
+TFBS.
 
-```{eval=F}
+``` {eval="F"}
 module load rsat/8sep2021
 
 matrix-scan -m JASPAR_matrices_meme.txt -matrix_format meme -i fetched_seq2.fasta -bgfile JASPAR_permatrices_meme.txt -bg_format meme -o matrix_scan2
 ```
--m <matrces_file_meme.txt>  indicates the name of the matices file
--matrix_format meme         indicates the matrices file is in meme format
--i <sequences.fasta>        indicates the name of the file with the sequences it will use to scan the matrices with
--bgfile <backgroung_model.txt> indicates the name of the file with the background model
--bg_format meme             indicates the background model file is in meme format
--o <outout_file>            indicates the name of the output file it will write
+
+-m \<matrces_file_meme.txt> indicates the name of the matices file
+-matrix_format meme indicates the matrices file is in meme format -i
+\<sequences.fasta> indicates the name of the file with the sequences it
+will use to scan the matrices with -bgfile \<backgroung_model.txt>
+indicates the name of the file with the background model -bg_format meme
+indicates the background model file is in meme format -o <outout_file>
+indicates the name of the output file it will write
 
 Note: This function might take several days to run
 
-The output file is tab-delimited with one row per match, it contains the following information:
+The output file is tab-delimited with one row per match, it contains the
+following information:
 
--seq_id: Name of the sequence, in this case it has a hg38_chr<n>_<start_pos>_<end_pos>_+ format
--ft_type: it takes values of 'limit' or 'site', with site indicating the match is at the TFBS.
--ft_name: Name of the PWM corresponding to this hit
--strand: Indicates in which strand was the hit, 'D' is for direct strand and 'R' is for reverse strand.
--start: Position of the first hit relative to the fetched seq, with the first nucleotide being -1.
--end: Position of the last hit relative to the fetched seq, with the first nucleotide being -1.
--sequence: Nucleotide sequence of the potential binding site.
--weight: Weight of a sequence segment (Ws) calculated as: 
-$$
+-seq_id: Name of the sequence, in this case it has a
+hg38_chr<n><start_pos><end_pos>\_+ format -ft_type: it takes values of
+'limit' or 'site', with site indicating the match is at the TFBS.
+-ft_name: Name of the PWM corresponding to this hit -strand: Indicates
+in which strand was the hit, 'D' is for direct strand and 'R' is for
+reverse strand. -start: Position of the first hit relative to the
+fetched seq, with the first nucleotide being -1. -end: Position of the
+last hit relative to the fetched seq, with the first nucleotide being
+-1. -sequence: Nucleotide sequence of the potential binding site.
+-weight: Weight of a sequence segment (Ws) calculated as: $$
 Ws= log[P(S|M)/P(S|B)]
-$$
-Where:
-S : Sequence segment
-M : PSSM 
-B : Background model matrix
+$$ Where: S : Sequence segment M : PSSM B : Background model matrix
 Note: the program uses natural logarithms
 
-##Finding significant TFBS
-To retrieve the most significant TFBS matched by our fetched sequences (that represent the genomic regions where H3K4me3 binds in both promoters and enhancers); we first look at the weight scores given by the matrix-scan program and the length of the matched sequences.
+##Finding significant TFBS To retrieve the most significant TFBS matched
+by our fetched sequences (that represent the genomic regions where
+H3K4me3 binds in both promoters and enhancers); we first look at the
+weight scores given by the matrix-scan program and the length of the
+matched sequences.
 
-Here we are looking for the biggest weight scores. Because of how the weight is calculated, then the bigger the weight scores, the more significant the probability of the matched sequences is to be a real TFBS. We also look for fairly long sequences, as short matching sequences will easily fit into random sequences just because they are short. 
+Here we are looking for the biggest weight scores. Because of how the
+weight is calculated, then the bigger the weight scores, the more
+significant the probability of the matched sequences is to be a real
+TFBS. We also look for fairly long sequences, as short matching
+sequences will easily fit into random sequences just because they are
+short.
 
 ### Statistical Test
-To know what our weight score threshold should be, we performed a Bonferroni statistical test, which is used to reduce false positives when dealing with multiple comparatives, in this way we aim to reduce the significance of false positives in our results:
+
+To know what our weight score threshold should be, we performed a
+Bonferroni statistical test, which is used to reduce false positives
+when dealing with multiple comparatives, in this way we aim to reduce
+the significance of false positives in our results:
 
 ```{r,eval=TRUE}
 #significance level for a single hypothesis test
@@ -676,11 +729,19 @@ n =
 af=
 ```
 
-Because of how the weight is calculated, then the bigger the weight scores, the more significant the probability of the matched sequences is to be a real TFBS. According to the Bonferroni test we performed, a weight score threshold of 22 should be enoght to rule out enough false positives from the matrix-scan output. We also look for fairly long sequences, as short matching sequences will easily fit into random sequences just because they are short. 
+Because of how the weight is calculated, then the bigger the weight
+scores, the more significant the probability of the matched sequences is
+to be a real TFBS. According to the Bonferroni test we performed, a
+weight score threshold of 22 should be enoght to rule out enough false
+positives from the matrix-scan output. We also look for fairly long
+sequences, as short matching sequences will easily fit into random
+sequences just because they are short.
 
-To fetch long sequences (more than 20 nucleotides) and high weight scores (grater than 22):
-Note: the length and weight scores are arbitrary.
-```{eval=F}
+To fetch long sequences (more than 20 nucleotides) and high weight
+scores (grater than 22): Note: the length and weight scores are
+arbitrary.
+
+``` {eval="F"}
 awk '{if(($6 - $5)> 20 && $8>22) print ($3)}' matrix_scan2 | uniq > ID_mat.txt
 
 #to see how many significant TFBS where found:
@@ -688,9 +749,13 @@ wc -l ID_mat.txt
 #output
 16
 ```
-With this parameters 16 significant TFBS where found for our fetched sequences.
 
-To fetch the name of the TFBS for each matrix match that passed our threshold:
+With this parameters 16 significant TFBS where found for our fetched
+sequences.
+
+To fetch the name of the TFBS for each matrix match that passed our
+threshold:
+
 ```{r, eval=F}
 grep -f ID_mat.txt JASPAR_matrices_meme.txt | cut -d "." -f 4 >> TF_name.txt
 
@@ -715,28 +780,31 @@ ZNF324
 ```
 
 ### TFBS Function
-Looking at JASPAR's database we can have an idea of the function of this TF:
-REST -> C2H2 zinc finger factors
-ESR1 -> Nuclear receptors with C4 zinc fingers
-TP63 -> p53 domain factors
-IRF1 -> Tryptophan cluster factors
-ZNF140 -> C2H2 zinc finger factors	
-ZNF382 -> C2H2 zinc finger factors
-ZNF675 -> C2H2 zinc finger factors
-ZNF8 -> C2H2 zinc finger factors
-NFIB -> SMAD/NF-1 DNA-binding domain factors
-ZFP42 -> C2H2 zinc finger factors
-ZNF16 -> C2H2 zinc finger factors
-SPI1 -> Tryptophan cluster factors
-CTCF -> C2H2 zinc finger factors
-CTCF -> C2H2 zinc finger factors
-ZNF320 -> C2H2 zinc finger factors
-ZNF324 -> C2H2 zinc finger factors
 
+Looking at JASPAR's database we can have an idea of the function of this
+TF: REST -> C2H2 zinc finger factors ESR1 -> Nuclear receptors with C4
+zinc fingers TP63 -> p53 domain factors IRF1 -> Tryptophan cluster
+factors ZNF140 -> C2H2 zinc finger factors\
+ZNF382 -> C2H2 zinc finger factors ZNF675 -> C2H2 zinc finger factors
+ZNF8 -> C2H2 zinc finger factors NFIB -> SMAD/NF-1 DNA-binding domain
+factors ZFP42 -> C2H2 zinc finger factors ZNF16 -> C2H2 zinc finger
+factors SPI1 -> Tryptophan cluster factors CTCF -> C2H2 zinc finger
+factors CTCF -> C2H2 zinc finger factors ZNF320 -> C2H2 zinc finger
+factors ZNF324 -> C2H2 zinc finger factors \*Note: we where able to find
+further information for each gene in the Gene Cards database:
+<https://www.genecards.org/>
 
 ## Conclusion
-We found 16 significantly enriched TFBS in Macrophage's promoters and enhancers. The proteins associates with this TFBS are 
 
+Firstly, there is significantly more enrichment for the histone
+modification H3K4m3 in promoter regions than in enhancer regions for
+Mcrophage from human samples.
+
+Secondly, we found 16 significantly enriched TFBS that are present both
+in promoters and enhancers of this Macrophage samples. The proteins
+associated with this TFBS are mostly zinc fingers that bind directly to
+DNA to either mediate chromatin structure or are involved in other gene
+activation or repression activities.
 
 # Sources
 
@@ -751,26 +819,39 @@ Monocyte data used
 
 Author. (year) Title. Journal editon. pp-pp.
 
-Higgs, D.R. Enhancer–promoter interactions and transcription. Nat Genet 52, 470–471 (2020). https://doi.org/10.1038/s41588-020-0620-7
+Higgs, D.R. Enhancer--promoter interactions and transcription. Nat Genet
+52, 470--471 (2020). <https://doi.org/10.1038/s41588-020-0620-7>
 
-Biola M. Javierre, Oliver S. Burren, Steven P. Wilder, ..., Chris Wallace, Mikhail Spivakov, Peter Fraser (2016). Lineage-Specific Genome Architecture Links Enhancers and Non-coding Disease Variants to Target Gene Promoters. Cell 167, 1369-1384.
+Biola M. Javierre, Oliver S. Burren, Steven P. Wilder, ..., Chris
+Wallace, Mikhail Spivakov, Peter Fraser (2016). Lineage-Specific Genome
+Architecture Links Enhancers and Non-coding Disease Variants to Target
+Gene Promoters. Cell 167, 1369-1384.
 
-Thomas-Chollier, M., Sand, O., Turatsinze, J. V., Janky, R., Defrance, M., Vervisch, E., Brohée, S., & van Helden, J. (2008). RSAT: regulatory sequence analysis tools. Nucleic acids research, 36(Web Server issue), W119–W127. https://doi.org/10.1093/nar/gkn304
+Thomas-Chollier, M., Sand, O., Turatsinze, J. V., Janky, R., Defrance,
+M., Vervisch, E., Brohée, S., & van Helden, J. (2008). RSAT: regulatory
+sequence analysis tools. Nucleic acids research, 36(Web Server issue),
+W119--W127. <https://doi.org/10.1093/nar/gkn304>
 
-Wasserman, W., Sandelin, A (2004). Applied bioinformatics for the identification of regulatory elements. Nat Rev Genet 5, 276–287. https://doi.org/10.1038/nrg1315
+Wasserman, W., Sandelin, A (2004). Applied bioinformatics for the
+identification of regulatory elements. Nat Rev Genet 5, 276--287.
+<https://doi.org/10.1038/nrg1315>
 
-Zach. (2021) The Bonferroni Correction: Definition and Example. Statology Org. https://www.statology.org/bonferroni-correction/#:~:text=For%20example%2C%20if%20we%20perform,01667.&text=Thus%2C%20we%20should%20only%20reject,the%20test%20is%20less%20than%20.
+Zach. (2021) The Bonferroni Correction: Definition and Example.
+Statology Org.
+<https://www.statology.org/bonferroni-correction/#>:\~:text=For%20example%2C%20if%20we%20perform,01667.&text=Thus%2C%20we%20should%20only%20reject,the%20test%20is%20less%20than%20.
 
-matrix-scan: http://rsat.sb-roscoff.fr/help.matrix-scan.html
+matrix-scan: <http://rsat.sb-roscoff.fr/help.matrix-scan.html>
 
-bedops 2.4.20 : https://bedops.readthedocs.io/en/latest/content/reference/set-operations/bedops.html
+bedops 2.4.20 :
+<https://bedops.readthedocs.io/en/latest/content/reference/set-operations/bedops.html>
 
-JASPAR 2022: https://jaspar.genereg.net/
+JASPAR 2022: <https://jaspar.genereg.net/>
 
-RSAT Metazoa: http://rsat.sb-roscoff.fr/tutorials.php
+RSAT Metazoa: <http://rsat.sb-roscoff.fr/tutorials.php>
 
-Rsat matrix-scan output file format documentation:  http://www.ra.cs.uni-tuebingen.de/software/ModuleMaster/doc/html/node6.html
+Rsat matrix-scan output file format documentation:
+<http://www.ra.cs.uni-tuebingen.de/software/ModuleMaster/doc/html/node6.html>
 
-deeptools 2.5.3: https://deeptools.readthedocs.io/en/develop/
+deeptools 2.5.3: <https://deeptools.readthedocs.io/en/develop/>
 
-liftOver: https://genome.ucsc.edu/cgi-bin/hgLiftOver
+liftOver: <https://genome.ucsc.edu/cgi-bin/hgLiftOver>
