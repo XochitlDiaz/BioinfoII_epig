@@ -656,7 +656,7 @@ wget -O JASPAR_permatrices_meme.txt http://jaspar.genereg.net/temp/2022041904540
 Note: The links provided by JASPAR to download the generated files last
 up to 5 days.
 
-##Pattern Matching Form the RSAT documentation we decided to use the
+## Pattern Matching Form the RSAT documentation we decided to use the
 'matrix-scan' program for pattern matching as it allows multiple
 sequences and PSSM as input, as well as pre-calibrated markov models and
 customized background models. In this case we used the permuted matrices
@@ -699,7 +699,7 @@ Ws= log[P(S|M)/P(S|B)]
 $$ Where: S : Sequence segment M : PSSM B : Background model matrix
 Note: the program uses natural logarithms
 
-##Finding significant TFBS To retrieve the most significant TFBS matched
+## Finding significant TFBS To retrieve the most significant TFBS matched
 by our fetched sequences (that represent the genomic regions where
 H3K4me3 binds in both promoters and enhancers); we first look at the
 weight scores given by the matrix-scan program and the length of the
@@ -723,10 +723,21 @@ the significance of false positives in our results:
 #significance level for a single hypothesis test
 ai = 0.05
 #total number of tests
-n = 
+n = 146697729 
+
+# Setting the FWER to the selected significance weight for a single hypothesis
+
+af= ai / n
+af
+
+# We know that the weight is calculated according to the formula:
+# Ws= log[P(S|M)/P(S|B)]
+# Since we have set our significance at af for each test, we substitute P(S|B) as af and P(S|M)<1
+# Ws = log[<1/af] and finally: Ws < log [1/af] in this way, we know that by selecting this value our probability of having one false positive will be lower than our significance value.
+weight = log(1/af)
+weight
 
 
-af=
 ```
 
 Because of how the weight is calculated, then the bigger the weight
