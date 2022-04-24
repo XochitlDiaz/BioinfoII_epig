@@ -753,7 +753,7 @@ scores (grater than 22): Note: the length and weight scores are
 arbitrary.
 
 ``` {eval="F"}
-awk '{if(($6 - $5)> 20 && $8>22) print ($3)}' matrix_scan2 | uniq > ID_mat.txt
+awk '{if(($6 - $5)> 20 && $8>22) print ($3)}' matrix_scan2 | sort | uniq > ID_mat.txt
 
 #to see how many significant TFBS where found:
 wc -l ID_mat.txt
